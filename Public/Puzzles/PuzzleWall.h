@@ -31,7 +31,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	//this is default component nessesary for logic this should be a wall that tells the hand what the movement should be add your own and add appropriate tag ->  
+	//this is default component nessesary for logic this should be a wall that tells the hand what the movement should be. Add your own and add appropriate tag ->  
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Puzzle | Component")
 	TObjectPtr<UStaticMeshComponent> WallMesh;
 
@@ -41,7 +41,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Puzzle | Components")
 	UBoxComponent* InteractionZone;
 
-	//Wiem ¿e to s³aby pomys³ w ten sposób robiæ UI i lepiej by³o by mieæ jeden centralny punkt i dodawaæ do niego poprostu dane ale jest póŸno bardzo chêtnie to zrobie póŸniej 
+	//Wiem ï¿½e to sï¿½aby pomysï¿½ w ten sposï¿½b robiï¿½ UI i lepiej byï¿½o by mieï¿½ jeden centralny punkt i dodawaï¿½ do niego poprostu dane ale jest pï¿½no bardzo chï¿½tnie to zrobie pï¿½niej 
 	//TODO Find a better way to make ui in Unreal 
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Puzzle | UI")
@@ -54,45 +54,22 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Puzzle | Components")
 	UCameraComponent* PuzzleCamera;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Puzzle | PlayerComponents")
-	UCameraComponent* PlayerCamera;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Puzzle | PlayerComponents")
-	TObjectPtr<ACharacter> PlayerCharater;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Puzzle | PlayerComponents")
-	TObjectPtr<APlayerController> PlayerControler;
-
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Puzzle | PlayerComponents")
 	FVector WorldHandTargetLocation;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	TObjectPtr<UInputMappingContext> DefaultMappingContext;
-	//Ca³y ten system raczej nie powinien byæ w tym pliku 
-	//TODO Change how the whole Input system is setup 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	TObjectPtr<UInputAction> MouseMove;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	TObjectPtr<UInputAction> LeftClick;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	TObjectPtr<UInputAction> Interact;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Puzzle | Settings")
 	float MouseSensitivity = 1.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Puzzle | Settings")
-	float GrabRadius = 20.f; // Jak blisko musi byæ rêka (w cm), ¿eby da³o siê z³apaæ punkt
+	float GrabRadius = 20.f; // Jak blisko musi byï¿½ rï¿½ka (w cm), ï¿½eby daï¿½o siï¿½ zï¿½apaï¿½ punkt
 
-	//FLAGI
-	bool bIsInteracting = false;
 	bool bIsPuzzleSetupValid = false;
 	bool bTryGrabing = false;
-	bool bTryingToInteract = true;
-	//FUNKCJE
 
-
-
+// poukladaj czytelniej kod.
+public:
 	UFUNCTION(BlueprintCallable, Category = "Puzzle | Functionality")
-	void StartPuzzle();
+	void StartPuzzle(ACharacter* PlayerCharater, APlayerController* PlayerControler);
 	//	void StartPuzzle(APlayerController* PlayerControler, ACharacter* PlayerCharater);
 	UFUNCTION(BlueprintCallable, Category = "Puzzle | Functionality")
 	void EndPuzzle();
@@ -112,9 +89,9 @@ protected:
 	void OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	UFUNCTION()
-	void MoveHand(const FInputActionValue &Value);
+	void MoveHand(const FVector2D &Input2D, ACharacter *PlayerCharater);
 	UFUNCTION()
-	void HandleGrab(const FInputActionValue& Value);
+	void HandleGrab(const bool bPressed);
 	void SetTryingToInteract(const FInputActionValue& Value);
 	// Called every frame
 	//virtual void Tick(float DeltaTime) override;

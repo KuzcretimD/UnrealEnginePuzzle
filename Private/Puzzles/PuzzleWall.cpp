@@ -2,15 +2,19 @@
 
 
 #include "Puzzles/PuzzleWall.h"
+#include "Puzzles/InteractionComponentPuzzle.h"
+#include "AnimInstanceSandboxCharacter_CMC.h"
+
+
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
+
 #include "Camera/CameraComponent.h"
+
 #include "GameFramework/Character.h"
-#include "EnhancedInputSubsystems.h"
-#include "EnhancedInputComponent.h"
-#include "InputActionValue.h"
-#include "AnimInstanceSandboxCharacter_CMC.h"
+
 #include "Blueprint/UserWidget.h"
+
 // Sets default values
 APuzzleWall::APuzzleWall()
 {
@@ -83,49 +87,44 @@ void APuzzleWall::BeginPlay()
 void APuzzleWall::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	UE_LOG(LogTemp, Warning, TEXT("TestPuzzle:Overlaped"));
-	//if (ACharacter* PlayerCharater = Cast<ACharacter>(OtherActor)) {
-	if (PlayerCharater = Cast<ACharacter>(OtherActor)) {
+	if (ACharacter *PlayerCharater = Cast<ACharacter>(OtherActor) ) {
 		UE_LOG(LogTemp, Warning, TEXT("TestPuzzle: PlayerCharater found"));
-		//TODO Add collision box for the puzzle using hand socket
-		//PlayerCharater->GetMesh()->GetSocketLocation(FName("hand_r")),
-		SuggestInteraction();
-		//TObjectPtr<APlayerController> PlayerControler = Cast<APlayerController>(PlayerCharater->GetController());
-		if (PlayerControler = Cast<APlayerController>(PlayerCharater->GetController())) {
-			UE_LOG(LogTemp, Warning, TEXT("TestPuzzle: PlayerControler found"))
-		};
 		
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerControler->GetLocalPlayer()))
-		{
-			// 2. Dodajemy mapowanie dla myszki
-			Subsystem->AddMappingContext(DefaultMappingContext, 100);
-			if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerControler->InputComponent)) {
-
-				//okej to jest crazy co ja tutaj robie musze to zmieniæ nie mogê tak poprostu w³¹czaæi wy³¹czaæ interakcji robi siê niestety nie zosta³o mi du¿o czasu na du¿e zmiany :(
-				EnhancedInputComponent->BindAction(Interact, ETriggerEvent::Triggered, this, &APuzzleWall::SetTryingToInteract);
-
-			}
+		if (UInteractionComponentPuzzle *PuzzleInteractionComponent = PlayerCharater->FindComponentByClass<UInteractionComponentPuzzle>()) {
+			PuzzleInteractionComponent->SetCurrentPuzzle(this);
 		}
+
+		//probably should be somehere else
+		SuggestInteraction();
+
 	}
 }
 
 void APuzzleWall::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	//Clear the puzzle UI
+	if (ACharacter* PlayerCharater = Cast<ACharacter>(OtherActor)) {
+		UE_LOG(LogTemp, Warning, TEXT("TestPuzzle: PlayerCharater found"));
+		//todo :Powinienm pewnie zapisaÃ„â€¡ ten InteractionComponent zamiast go szukac za karzdym razem gdy chce go uÃ…Â¼yc 
+		if (UInteractionComponentPuzzle* PuzzleInteractionComponent = PlayerCharater->FindComponentByClass<UInteractionComponentPuzzle>()) {
+			PuzzleInteractionComponent->ClearCurrentPuzzle(this);
+		}
+
+	}
+
+	//probably should be somehere else
 	ClearPuzzleUI();
-	return;
 }
 
-void APuzzleWall::MoveHand(const FInputActionValue &Value)
+void APuzzleWall::MoveHand(const FVector2D& Input2D, ACharacter* PlayerCharater)
 {
-	FVector2D Input2D = Value.Get<FVector2D>();
-
+	UE_LOG(LogTemp, Display, TEXT("prÃ³ba ruchu rÄ™ki 2 "));
 	WorldHandTargetLocation.Y += Input2D.X * MouseSensitivity * WallMesh->GetRightVector().Y;
 	WorldHandTargetLocation.X += Input2D.X * MouseSensitivity * WallMesh->GetRightVector().X;
 	WorldHandTargetLocation.Z -= Input2D.Y * MouseSensitivity * WallMesh->GetUpVector().Z;
 
-	DrawDebugSphere(GetWorld(), InteractionPoint->GetComponentLocation(), GrabRadius, 12, FColor::Emerald, false, -1.f, 0, 1.f);
+	//DrawDebugSphere(GetWorld(), InteractionPoint->GetComponentLocation(), GrabRadius, 12, FColor::Emerald, false, -1.f, 0, 1.f);
 	if (bTryGrabing) {
-		DrawDebugSphere(GetWorld(),PlayerCharater->GetMesh()->GetBoneLocation("hand_r"), 5, 12, FColor::Emerald, false, -1.f, 0, 1.f);
+		//DrawDebugSphere(GetWorld(),PlayerCharater->GetMesh()->GetBoneLocation("hand_r"), 5, 12, FColor::Emerald, false, -1.f, 0, 1.f);
 		if (FVector::Distance(PlayerCharater->GetMesh()->GetBoneLocation("hand_r"), InteractionPoint->GetComponentLocation()) <= GrabRadius) {
 			UE_LOG(LogTemp, Warning, TEXT("mozesz lapac"));
 			
@@ -134,8 +133,8 @@ void APuzzleWall::MoveHand(const FInputActionValue &Value)
 						Input2D.X * MouseSensitivity * WallMesh->GetRightVector().Y,
 						-Input2D.Y * MouseSensitivity * WallMesh->GetUpVector().Z)
 				);
-			//dodaj coœ w tym stylu ¿e coœ siê dzieje z punktem interakcji kiedy gracz zaczyne go przesówaæ mo¿e wciskanie go nie ma sensu ale jakaœ rotacja 
-			//chce przekazaæ graczowi dodatkokwy feedback ¿e coœ siê faktycznie dzieje z kostk¹
+			//dodaj coÃ¯Â¿Â½ w tym stylu Ã¯Â¿Â½e coÃ¯Â¿Â½ siÃ¯Â¿Â½ dzieje z punktem interakcji kiedy gracz zaczyne go przesÃ¯Â¿Â½waÃ¯Â¿Â½ moÃ¯Â¿Â½e wciskanie go nie ma sensu ale jakaÃ¯Â¿Â½ rotacja 
+			//chce przekazaÃ¯Â¿Â½ graczowi dodatkokwy feedback Ã¯Â¿Â½e coÃ¯Â¿Â½ siÃ¯Â¿Â½ faktycznie dzieje z kostkÃ¯Â¿Â½
 			//if (!presed) {
 			//	InteractionPoint->SetRelativeLocation(FVector(InteractionPoint->GetRelativeLocation().X + 5, InteractionPoint->GetRelativeLocation().Y, InteractionPoint->GetRelativeLocation().Z));
 			//	pressed = true;
@@ -148,8 +147,8 @@ void APuzzleWall::MoveHand(const FInputActionValue &Value)
 	
 	//WorldHandTargetLocation = WallMesh->GetComponentLocation() + WallMesh->GetComponentRotation().RotateVector(WorldHandTargetLocation);
 	//FVector WorldHandPosition = WallMesh->GetComponentTransform().TransformPosition(WorldHandTargetLocation);
-	DrawDebugSphere(GetWorld(), WorldHandTargetLocation, 15.f, 12, FColor::Red, false, -1.f, 0, 2.f);
-	DrawDebugLine(GetWorld(), PlayerCharater->GetMesh()->GetSocketLocation(FName("hand_r")), WorldHandTargetLocation, FColor::Green, false, -1.f, 0, 2.f);
+	//DrawDebugSphere(GetWorld(), WorldHandTargetLocation, 15.f, 12, FColor::Red, false, -1.f, 0, 2.f);
+	//DrawDebugLine(GetWorld(), PlayerCharater->GetMesh()->GetSocketLocation(FName("hand_r")), WorldHandTargetLocation, FColor::Green, false, -1.f, 0, 2.f);
 
 	//const FVector WorldHandLocation = WallMesh->GetComponentTransform().TransformPosition(WorldHandTargetLocation);
 	const FVector MeshSpaceHandLocation = WallMesh->GetComponentTransform().InverseTransformPosition(WorldHandTargetLocation);
@@ -163,12 +162,12 @@ void APuzzleWall::MoveHand(const FInputActionValue &Value)
 	//DrawDebugLine(GetWorld(), PlayerCharater->GetMesh()->GetSocketLocation(FName("hand_r")), WorldHandLocation, FColor::Yellow, false, -1.f, 0, 2.f);
 	
 
-	DrawDebugSphere(GetWorld(), MeshSpaceHandLocation, 15.f, 12, FColor::Magenta, false, -1.f, 0, 2.f);
-	DrawDebugLine(GetWorld(), PlayerCharater->GetMesh()->GetSocketLocation(FName("hand_r")), MeshSpaceHandLocation, FColor::Magenta, false, -1.f, 0, 2.f);
+	//DrawDebugSphere(GetWorld(), MeshSpaceHandLocation, 15.f, 12, FColor::Magenta, false, -1.f, 0, 2.f);
+	//DrawDebugLine(GetWorld(), PlayerCharater->GetMesh()->GetSocketLocation(FName("hand_r")), MeshSpaceHandLocation, FColor::Magenta, false, -1.f, 0, 2.f);
 
 
 	//DrawDebugSphere(GetWorld(), WorldHandPosition, 15.f, 12, FColor::Purple, false, -1.f, 0, 2.f);
-	DrawDebugLine(GetWorld(), PlayerCharater->GetMesh()->GetSocketLocation(FName("hand_r")), WorldHandTargetLocation, FColor::Cyan, false, -1.f, 0, 2.f);
+	//DrawDebugLine(GetWorld(), PlayerCharater->GetMesh()->GetSocketLocation(FName("hand_r")), WorldHandTargetLocation, FColor::Cyan, false, -1.f, 0, 2.f);
 	//Draw a debug sphere that i can see in editor for  local hand location 
 	UE_LOG(LogTemp, Warning, TEXT("Myszka ruszyla sie o: X = %f, Y = %f"), Input2D.X, Input2D.Y);
 	UE_LOG(LogTemp, Warning, TEXT("Pozycja dla WorldHandTargetLocation: X = %f, Y = %f"), WorldHandTargetLocation.Y, WorldHandTargetLocation.Z);
@@ -179,34 +178,20 @@ void APuzzleWall::MoveHand(const FInputActionValue &Value)
 		PlayerAnimInstance->SetPuzzleMode(true, WorldHandTargetLocation, PlayerHandLocalRoation);
 	}
 
-	if (!bTryingToInteract) {
-		EndPuzzle();
-	}
-	
 }
 
-void APuzzleWall::HandleGrab(const FInputActionValue& Value)
+void APuzzleWall::HandleGrab(const bool bPressed)
 {
-	bTryGrabing = Value.Get<bool>();
+	bTryGrabing =  bPressed;
 }
 
-void APuzzleWall::SetTryingToInteract(const FInputActionValue& Value)
-{
-	UE_LOG(LogTemp, Warning, TEXT("trying to interact= %d , %d"),Value.Get<bool>(), bTryingToInteract);
-	if (bTryingToInteract) {
-		StartPuzzle();
-		SuggestInteractionEnd();
-	}
-	bTryingToInteract = !bTryingToInteract;
 
-}
+
 
 //void APuzzleWall::StartPuzzle(APlayerController* PlayerControler, ACharacter* PlayerCharater)
-void APuzzleWall::StartPuzzle()
+void APuzzleWall::StartPuzzle(ACharacter *PlayerCharater, APlayerController *PlayerControler )
 {
-	bIsInteracting = true;
-	
-	if (!bIsPuzzleSetupValid || !PlayerControler) { return; UE_LOG(LogTemp, Warning, TEXT("TestPuzzle: Puzle failed to start"));}
+	if (!bIsPuzzleSetupValid || !PlayerControler) { UE_LOG(LogTemp, Warning, TEXT("TestPuzzle: Puzle failed to start")); return;}
 	
 	PlayerCharater->DisableInput(PlayerControler);
 	PlayerControler->SetViewTargetWithBlend(this, 1.f);
@@ -233,68 +218,42 @@ void APuzzleWall::StartPuzzle()
 	PlayerCharater->SetActorRotation(DesiredCharaterRotation.Rotation());
 
 
-	DrawDebugSphere(GetWorld(), WallMesh->GetComponentLocation(), 200.f, 12, FColor::Silver, true, -1.f, 0, 5.f);
-	DrawDebugSphere(GetWorld(), RootComponent->GetComponentLocation(), 240.f, 12, FColor::Black, true, -1.f, 0, 5.f);
-	DrawDebugSphere(GetWorld(), WorldHandTargetLocation, 210.f, 12, FColor::Blue, true, -1.f, 0, 5.f);
-	DrawDebugSphere(GetWorld(), RootComponent->GetRelativeLocation(), 240.f, 12, FColor::Green, true, -1.f, 0, 5.f);
+	//DrawDebugSphere(GetWorld(), WallMesh->GetComponentLocation(), 200.f, 12, FColor::Silver, true, -1.f, 0, 5.f);
+	//DrawDebugSphere(GetWorld(), RootComponent->GetComponentLocation(), 240.f, 12, FColor::Black, true, -1.f, 0, 5.f);
+	//DrawDebugSphere(GetWorld(), WorldHandTargetLocation, 210.f, 12, FColor::Blue, true, -1.f, 0, 5.f);
+	//DrawDebugSphere(GetWorld(), RootComponent->GetRelativeLocation(), 240.f, 12, FColor::Green, true, -1.f, 0, 5.f);
 
 	//DrawDebugSphere(GetWorld(), WallMesh->GetComponentLocation().RightVector, 200.f, 12, FColor::Purple, true, -1.f, 0, 5.f);
 	//DrawDebugSphere(GetWorld(), WallMesh->GetComponentLocation().UpVector, 240.f, 12, FColor::Yellow, true, -1.f, 0, 5.f);
 	UE_LOG(LogTemp, Warning, TEXT("Vektory relatywne do Wallmesh: Y = %f, Z = %f"), WallMesh->GetRightVector().Y, WallMesh->GetRightVector().Z);
 
 	UE_LOG(LogTemp, Warning, TEXT("TestPuzzle: Camera changed"));
-
-
-	// To jest bardzo Ÿle powinien byæ jeden subsystem a nie ¿e ja sobie dodaje tysi¹c ró¿nych bindów to jest tragiczne musze to zmieniæ. szkoda ¿e nie zauwazy³em tego wczeœniej 
-	// powwinienm to wszystko robiæ w Player controler i mieæ jakieœ delegaty pomyœl o tym.
-	// TODO FIX THIS 
-	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerControler->GetLocalPlayer()))
-	{
-		// 2. Dodajemy mapowanie dla myszki
-		Subsystem->AddMappingContext(DefaultMappingContext, 100);
-		if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerControler->InputComponent)) {
-			EnhancedInputComponent->BindAction(MouseMove, ETriggerEvent::Triggered, this, &APuzzleWall::MoveHand);
-			EnhancedInputComponent->BindAction(LeftClick, ETriggerEvent::Triggered, this, &APuzzleWall::HandleGrab);
-			//let's see if the actions work this ETriggerEvent works this way 
-			EnhancedInputComponent->BindAction(Interact, ETriggerEvent::Triggered, this, &APuzzleWall::SetTryingToInteract);
-			EnhancedInputComponent->BindAction(Interact, ETriggerEvent::Completed, this, &APuzzleWall::SetTryingToInteract);
-
-		}
-	}
 }
 
+//TODO 
 void APuzzleWall::EndPuzzle()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Puzzle Ended return"));
-	//zmien to spowrotem 
-	//PlayerCharater->DisableInput(PlayerControler);
-	//PlayerControler->SetViewTargetWithBlend(this, 1.f);
-	
-	PlayerControler->SetViewTargetWithBlend(PlayerCharater, 1.f);
-	PlayerCharater->EnableInput(PlayerControler);
-	if (TObjectPtr<UAnimInstanceSandboxCharacter_CMC> PlayerAnimInstance = Cast<UAnimInstanceSandboxCharacter_CMC>(PlayerCharater->GetMesh()->GetAnimInstance())) {
-		PlayerAnimInstance->SetPuzzleMode(false, FVector().ZeroVector, FRotator().ZeroRotator);
-	}
 
-	//prawdopodobnie nadal stoi w boxCollision wiêc 
+	//prawdopodobnie nadal stoi w boxCollision wiÃ¯Â¿Â½c 
 	SuggestInteraction();
 
 }
 
 void APuzzleWall::SuggestInteraction()
 {
-	// Sprawdzamy, czy w Blueprincie przypisano klasê UI
+	// Sprawdzamy, czy w Blueprincie przypisano klasÃ¯Â¿Â½ UI
 	if (!PuzzleStartUI) {
 		UE_LOG(LogTemp, Warning, TEXT("Brak przypisanego UI"));
 		return;
 	}
-	// Jeœli widget jeszcze nie istnieje, tworzymy go
+	// JeÃ¯Â¿Â½li widget jeszcze nie istnieje, tworzymy go
 	if (!PuzzleUIInstance)
 	{
 		PuzzleUIInstance = CreateWidget<UUserWidget>(GetWorld(), PuzzleStartUI);
 	}
 
-	// Jeœli uda³o siê stworzyæ i jeszcze go nie ma na ekranie, dodajemy
+	// JeÃ¯Â¿Â½li udaÃ¯Â¿Â½o siÃ¯Â¿Â½ stworzyÃ¯Â¿Â½ i jeszcze go nie ma na ekranie, dodajemy
 	if (PuzzleUIInstance && !PuzzleUIInstance->IsInViewport())
 	{
 		PuzzleUIInstance->AddToViewport();
@@ -313,6 +272,6 @@ void APuzzleWall::ClearPuzzleUI()
 {
 	if (PuzzleUIInstance && PuzzleUIInstance->IsInViewport())
 	{
-		PuzzleUIInstance->RemoveFromViewport();
+		PuzzleUIInstance->RemoveFromParent();
 	}
 }
