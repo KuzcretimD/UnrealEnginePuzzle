@@ -24,7 +24,9 @@ Responsible for:
 
 
 ## ActionSystem:
-i've added this because the way I handle the puzzle interaction might be a little insane right now, i'll change that 
+i've added this because the way I handle the puzzle interaction is not ideal, i'll change that.
+
+
 (I will show more)
 Video:
 
