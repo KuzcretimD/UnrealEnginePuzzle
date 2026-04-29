@@ -22,6 +22,29 @@ Responsible for:
 - blending hand interaction state
 - receiving puzzle mode target data for animation
 
+
+## ActionSystem:
+(I will show more)
+Video:
+
+https://github.com/user-attachments/assets/71094711-104f-4a92-9071-9ce0f6859862
+https://github.com/user-attachments/assets/8753984b-fad6-448d-93ec-ff10822ca61c
+
+
+
+
+
+
+### UAS_ActionSystemComponent
+Responsible for:
+- tracking active and available character actions
+- starting and stopping actions using Gameplay Tags
+
+### UAS_Action
+Responsible for:
+- defining action
+- providing a way to create new actions in the editor
+
 ## Controls
 
 - **Interact**: enter/exit puzzle mode
