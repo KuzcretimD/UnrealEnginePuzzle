@@ -54,6 +54,8 @@ void UInteractionComponentPuzzle::ClearCurrentPuzzle(APuzzleWall* PuzzleWall)
 }
 void UInteractionComponentPuzzle::BindPuzzleInput()
 {
+	//może powinienm to zmienic bo teraz zawsze zaczynam interakcje z puzlem tylko jeżeli enterpuzzle nie ma żadnego puzla ustawionego to się nie zaczyna co jest chyba ok ale nie wiem trochę dziwne 
+	//think about it 
 	if (!PlayerControler) { return; }
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerControler->InputComponent)) {
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &UInteractionComponentPuzzle::OnInteractPressed);
@@ -62,7 +64,7 @@ void UInteractionComponentPuzzle::BindPuzzleInput()
 void UInteractionComponentPuzzle::OnInteractPressed(const FInputActionValue& Value){
 	const bool pressed = Value.Get<bool>();
 	//nie jestem jescze penwy jak działą trigger więc sprawdze też wrazie czego czy nie dostaje tutaj false z value;
-	if (!pressed) { return; }
+	if (!pressed) { UE_LOG(LogTemp, Display, TEXT("przycisk interacji nie wcisniety ale triger zadziałał")); return; }
 	if (Value.Get<bool>() && !bIsInteracting) {
 		EnterPuzzle();
 	}

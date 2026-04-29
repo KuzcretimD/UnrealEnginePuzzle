@@ -6,6 +6,7 @@
 #include "Animation/AnimInstance.h"
 #include "AnimInstanceSandboxCharacter_CMC.generated.h"
 
+
 /**
  * 
  */
@@ -31,6 +32,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Puzzles | Wallpuzzle")
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
+
 
 
 };

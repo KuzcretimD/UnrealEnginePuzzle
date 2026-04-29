@@ -242,18 +242,17 @@ void APuzzleWall::EndPuzzle()
 
 void APuzzleWall::SuggestInteraction()
 {
-	// Sprawdzamy, czy w Blueprincie przypisano klasï¿½ UI
 	if (!PuzzleStartUI) {
 		UE_LOG(LogTemp, Warning, TEXT("Brak przypisanego UI"));
 		return;
 	}
-	// Jeï¿½li widget jeszcze nie istnieje, tworzymy go
+	
 	if (!PuzzleUIInstance)
 	{
 		PuzzleUIInstance = CreateWidget<UUserWidget>(GetWorld(), PuzzleStartUI);
 	}
 
-	// Jeï¿½li udaï¿½o siï¿½ stworzyï¿½ i jeszcze go nie ma na ekranie, dodajemy
+
 	if (PuzzleUIInstance && !PuzzleUIInstance->IsInViewport())
 	{
 		PuzzleUIInstance->AddToViewport();

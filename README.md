@@ -1,2 +1,41 @@
-# UnrealEnginePuzzle
-This should show you the puzzle system i made if you don't see it i'm sorry for the inconvinience i'm having problem uploading files
+Small Unreal Engine 5 C++ gameplay prototype focused on puzzle interaction in imersive way 
+Video : 
+
+https://github.com/user-attachments/assets/97700736-951f-4a03-a377-71ce4e6565a0
+
+
+
+### APuzzleWall
+Responsible for:
+- puzzle actor setup and overlap zone
+- puzzle-specific logic 
+- puzzle camera placement 
+
+### UInteractionComponentPuzzle
+Responsible for:
+- keeping currently available puzzle reference
+- adding/removing puzzle input mapping context
+- passing mouse/grab input to active puzzle
+
+### UAnimInstanceSandboxCharacter_CMC
+Responsible for:
+- blending hand interaction state
+- receiving puzzle mode target data for animation
+
+## Controls
+
+- **Interact**: enter/exit puzzle mode
+- **Mouse move**: move hand target while in puzzle mode
+- **Left click**: grab interaction point
+
+
+## Refactor Notes
+
+Planned next steps:
+1. Finalize input mapping consistency for mouse move.
+2. Stabilize enter/exit state handling.
+3. Move UI management out of puzzle actor.
+4. add proper rotation for the hand
+5. add ability to contrain the movable puzzle object for the easy work on puzzle design
+Small Unreal Engine 5 C++ gameplay prototype focused on puzzle interaction in imersive way 
+
