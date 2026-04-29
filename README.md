@@ -24,6 +24,7 @@ Responsible for:
 
 
 ## ActionSystem:
+i've added this because the way I handle the puzzle interaction might be a little insane right now, i'll change that 
 (I will show more)
 Video:
 
@@ -37,7 +38,7 @@ https://github.com/user-attachments/assets/8753984b-fad6-448d-93ec-ff10822ca61c
 
 
 
-### UAS_ActionSystemComponent
+### UAS_ActionSystemComponent 
 Responsible for:
 - tracking active and available character actions
 - starting and stopping actions using Gameplay Tags
